@@ -15,6 +15,8 @@ st.set_page_config(page_title='แรงลม มยผ', layout='wide', page_i
 st.sidebar.title('Navigation')
 page = st.sidebar.radio("Go to", ["การคำนวณแรงลมสำหรับอาคารเตี้ย", "การคำนวณแรงลมสำหรับอาคารสูง","แรงแผ่นดินไหว"])
 
+st.title(page)
+
 if page == "การคำนวณแรงลมสำหรับอาคารเตี้ย":
     wind_low_building.main()
 
