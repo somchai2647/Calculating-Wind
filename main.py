@@ -7,6 +7,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 import wind_low_building
+import wind_hight_building
 import earthquake
 
 
@@ -18,7 +19,7 @@ if page == "การคำนวณแรงลมสำหรับอาค�
     wind_low_building.main()
 
 elif page == "การคำนวณแรงลมสำหรับอาคารสูง":
-    st.write("Comming soon")
+    wind_hight_building.main()
 
 elif page == "แรงแผ่นดินไหว":
     earthquake.main()
