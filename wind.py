@@ -335,8 +335,6 @@ def main():
     symmetricalInertia_2 = df_p_case_1[1:].values.tolist()
 
     for i in range(len(symmetricalInertia_1)):
-        print(symmetricalInertia_1[i][0], "-", leftValue,
-              "=", symmetricalInertia_1[i][0] - leftValue)
         symmetricalInertia_1[i] = symmetricalInertia_1[i][0] - leftValue
         symmetricalInertia_2[i] = symmetricalInertia_2[i][0] - rightValue
 
