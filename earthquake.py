@@ -71,7 +71,7 @@ def main():
         with col2:
             district = st.selectbox(
                 # เลือกอำเภอ
-                label='อำเภอ', options=df_SsS1.loc[df_SsS1['จังหวัด'] == province, 'อำเภอ'], index=8, key='district')
+                label='อำเภอ', options=df_SsS1.loc[df_SsS1['จังหวัด'] == province, 'อำเภอ'], index=0, key='district')
 
         Ss = df_SsS1.loc[(df_SsS1['จังหวัด'] == province) & (
             df_SsS1['อำเภอ'] == district), 'Ss'].iloc[0]  # ค่า Ss จากข้อมูล
@@ -537,6 +537,10 @@ def main():
             r'Acceleration of structure, $S_a = %.3f \mathrm{~g}$' % (Sa_structure))
 
     with col2:  # แสดงข้อมูลในตาราง
+
+        min_length = min(len(T_data), len(S_data))  # คำนวณความยาวของข้อมูลที่น้อยที่สุด
+        T_data = T_data[:min_length]  # กำหนดค่า T_data ให้มีความยาวเท่ากับ min_length
+        S_data = S_data[:min_length]  # กำหนดค่า S_data ให้มีความยาวเท่ากับ min_length
 
         df = pd.DataFrame({
             'T (second)': T_data,
