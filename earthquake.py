@@ -25,12 +25,12 @@ def main():
     }
     important = st.selectbox(label='ประเภทความสำคัญ',
                              options=important_dict.keys(), key='important')
-    I = important_dict[important]
-    st.write(r'Important factor, $I = %.2f$' % (I))
+    I = important_dict[important] # กำหนดค่า I จาก dictionary
+    st.write(r'Important factor, $I = %.2f$' % (I)) 
 
     st.write(
         '### วิธีการวิเคราะห์โครงสร้างเพื่อคำนวณผลของแรงแผ่นดินไหว โดยวิธีสถิตย์เทียบเท่า')
-    cal_list = ['วิธีสถิตย์เทียบเท่า', 'วิธีเชิงพลศาสตร์']
+    cal_list = ['วิธีสถิตย์เทียบเท่า', 'วิธีเชิงพลศาสตร์'] # สร้าง list ของวิธีการวิเคราะห์
 
     cal = "วิธีสถิตย์เทียบเท่า"  # 👈 ตั้งค่าเริ่มต้น
 
@@ -155,27 +155,31 @@ def main():
 
     else:
         with (st.expander('การแบ่งโซนพื้นที่ในแอ่งกรุงเทพฯ')):
-            img_show('eq_bkk_zone.png')
+            img_show('eq_bkk_zone.png')  # แสดงรูปภาพ
 
-        zone = st.selectbox(label='Zone', options=np.arange(1, 11), key='zone')
+        zone = st.selectbox(label='Zone', options=np.arange(
+            1, 11), key='zone')  # เลือกโซน
 
-        sheet_name_ = 'bkk_equivalent'
+        sheet_name_ = 'bkk_equivalent'  # ชื่อ sheet ของข้อมูล
 
-        if damping == '5.0%':
+        if damping == '5.0%':  # ถ้าเลือกค่าความหน่วง 5.0%
+            # กำหนดชื่อ sheet ของข้อมูล โดยเพิ่ม _5.0 ต่อท้าย
             sheet_name = sheet_name_ + '_5.0'
         else:
-            sheet_name = sheet_name_ + '_2.5'
+            sheet_name = sheet_name_ + '_2.5'  # ถ้าไม่ใช่ 5.0% ก็เป็น 2.5% แทน
 
+        # อ่านข้อมูลจากไฟล์ excel
         df_bkk = pd.read_excel('แผ่นดินไหว_table.xlsx', sheet_name=sheet_name)
 
-        col = df_bkk.columns
+        col = df_bkk.columns  # คอลัมน์ของข้อมูล
         df_bkk = pd.melt(
+            # ทำการ transpose ข้อมูล คือ สลับแถวกับคอลัมน์
             df_bkk, id_vars=col[0], value_vars=col[1:], var_name='T', value_name='Sa').astype('float')
 
         SDS = df_bkk.loc[(df_bkk['zone'] == zone) & (
-            df_bkk['T'] == 0.2), 'Sa'].iloc[0]
+            df_bkk['T'] == 0.2), 'Sa'].iloc[0]  # คำนวณค่า SDS
         SD1 = df_bkk.loc[(df_bkk['zone'] == zone) & (
-            df_bkk['T'] == 1.0), 'Sa'].iloc[0]
+            df_bkk['T'] == 1.0), 'Sa'].iloc[0]  # คำนวณค่า SD1
 
         st.write(r'$S_{DS} = %.3f \> g$' % (SDS))
         st.write(r'$S_{D1} = %.3f \> g$' % (SD1))
@@ -594,15 +598,18 @@ def main():
     with col1:
         st.write('**Input** (this table is editable)')
         df_v_distribute = st.data_editor(
-            df_v_distribute, num_rows="dynamic", key='df_v_distribute') # แสดงตารางแก้ไขข้อมูล
+            df_v_distribute, num_rows="dynamic", key='df_v_distribute')  # แสดงตารางแก้ไขข้อมูล
     with col2:
         st.write('**Output**')
         df_v_cal = pd.DataFrame()
         df_v_cal['hi [m]'] = df_v_distribute.loc[::-
-                                                 1, 'Floor height [m]'].cumsum()[::-1] # คำนวณค่า hi จากข้อมูล
-        wihik = df_v_distribute['Wi [tonne]']*(df_v_cal['hi [m]']**k) # คำนวณค่า wihik จากข้อมูล
-        df_v_cal['Cvi'] = wihik / wihik.sum() # คำนวณค่า Cvi จากข้อมูล
-        df_v_cal['Fi [tonne]'] = df_v_cal['Cvi']*V # คำนวณค่า Fi จากข้อมูล
-        df_v_cal['Vi [tonne]'] = df_v_cal['Fi [tonne]'].cumsum() # คำนวณค่า Vi จากข้อมูล
+                                                 # คำนวณค่า hi จากข้อมูล
+                                                 1, 'Floor height [m]'].cumsum()[::-1]
+        wihik = df_v_distribute['Wi [tonne]'] * \
+            (df_v_cal['hi [m]']**k)  # คำนวณค่า wihik จากข้อมูล
+        df_v_cal['Cvi'] = wihik / wihik.sum()  # คำนวณค่า Cvi จากข้อมูล
+        df_v_cal['Fi [tonne]'] = df_v_cal['Cvi']*V  # คำนวณค่า Fi จากข้อมูล
+        # คำนวณค่า Vi จากข้อมูล
+        df_v_cal['Vi [tonne]'] = df_v_cal['Fi [tonne]'].cumsum()
 
-        st.dataframe(df_v_cal, hide_index=True) # แสดง dataframe
+        st.dataframe(df_v_cal, hide_index=True)  # แสดง dataframe

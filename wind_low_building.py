@@ -217,7 +217,7 @@ def main():
     st.divider()
 
     # Step 4.2: หา CgCp และ แรงลมภายนอกอาคาร P
-    st.markdown(r'### ค่าสัมประสิทธิ์ของหน่วยแรงลมภายนอก, $C_p C_g$')
+    st.markdown(r'### ค่าสัมประสิทธิ์ของหน่วยแรงลมภายนอก, $C_p C_g$ กรณีที่ 1')
 
     df_case1 = pd.DataFrame({
         'Slope min [deg]': [0, 20, 30, 90],
@@ -232,27 +232,10 @@ def main():
         '4E': [-0.8, -1.2, -0.9, -0.9],
     })
 
-    df_case2 = pd.DataFrame({
-        'Slope min [deg]': [0],
-        'Slope max [deg]': [90],
-        '1': [-0.85],
-        '1E': [-0.9],
-        '2': [-1.3],
-        '2E': [-2.0],
-        '3': [-0.7],
-        '3E': [-1.0],
-        '4': [-0.85],
-        '4E': [-0.9],
-        '5': [0.75],
-        '5E': [1.15],
-        '6': [-0.55],
-        '6E': [-0.8],
-    })
-
     zone_list = df_case1.columns
     zone_list = ['Slope [deg]'] + zone_list[2:].to_list()
 
-    def interpolate_y(index):
+    def interpolate_y(index):  # index = 0, 1, 2
         x_data = [float(df_case1['Slope max [deg]'][index]),
                   float(df_case1['Slope min [deg]'][index+1])]
         aa = df_case1.iloc[index, 2:].to_list()
@@ -327,7 +310,7 @@ def main():
 
     # Step 5 หน่วยแรงลมสุทธิ
 
-    st.markdown(r'### หน่วยแรงลมสุทธิ')
+    st.markdown(r'### หน่วยแรงลมสุทธิ กรณีที่ 1')
     st.write("กรณีที่ 1: ทิศทางลมอยู่แนวตั้งฉากกับสันหลังคา")
     # st.dataframe(df_p_case_1[1:])
 
@@ -346,3 +329,84 @@ def main():
     df = pd.DataFrame(data)
 
     st.dataframe(df, hide_index=True, use_container_width=True)
+
+    st.divider()
+
+    st.markdown(r'### ค่าสัมประสิทธิ์ของหน่วยแรงลมภายนอก, $C_p C_g$ กรณีที่ 2')
+    st.markdown(
+        '**กรณีที่ 2:** ทิศทางการพัดของลมโดยทั่วไปอยู่ในแนว**ตั้งฉาก**กับสันหลังคา')
+
+    df_case2 = pd.DataFrame({
+        'Slope min [deg]': [0],
+        'Slope max [deg]': [90],
+        '1': [-0.85],
+        '1E': [-0.9],
+        '2': [-1.3],
+        '2E': [-2.0],
+        '3': [-0.7],
+        '3E': [-1.0],
+        '4': [-0.85],
+        '4E': [-0.9],
+        '5': [0.75],
+        '5E': [1.15],
+        '6': [-0.55],
+        '6E': [-0.8],
+    })
+
+    zone_list = df_case2.columns
+    zone_list = ['Slope [deg]'] + zone_list[2:].to_list()
+
+    if slope >= 0.0 and slope <= 90.0:
+        df_CpCg = pd.DataFrame(
+            data=[round(slope, 2)] + df_case2.iloc[0, 2:].to_list())
+        df_CpCg = df_CpCg.T
+        df_CpCg.columns = zone_list
+
+    col1x, _, _ = st.columns([0.5, 0.5, 0.5])
+    with col1x:
+        img_show('CpCg_case2.png')
+
+    p_case_2 = df_CpCg.iloc[0, 1:].to_list()
+
+    for i in range(len(p_case_2)):
+        p_case_2[i] = (Iw * q * Ce * p_case_2[i])
+        print(p_case_2[i])
+
+    p_case_2.insert(0, 'หน่วยแรงลมภายนอกอาคาร, P กิโลกรัมต่อตารางเมตร')
+    df_p_case_2 = pd.DataFrame(p_case_2)
+
+    windOutside_case_2 = df_p_case_2.transpose()
+
+    windOutside_case_2.columns = df_CpCg.columns
+
+    updated_df_CpCg = pd.concat(
+        [df_CpCg, windOutside_case_2]
+    ).reset_index(drop=True)
+
+    st.dataframe(updated_df_CpCg, hide_index=True, use_container_width=True)
+
+    st.divider()
+
+    st.markdown(r'### หน่วยแรงลมสุทธิ กรณีที่ 2')
+    st.write("กรณีที่ 2: ทิศทางลมอยู่แนวตั้งฉากกับสันหลังคา")
+
+    symmetricalInertia_1 = df_p_case_2[1:].values.tolist()
+    symmetricalInertia_2 = df_p_case_2[1:].values.tolist()
+
+    for i in range(len(symmetricalInertia_1)):
+        symmetricalInertia_1[i] = symmetricalInertia_1[i][0] - leftValue
+        symmetricalInertia_2[i] = symmetricalInertia_2[i][0] - rightValue
+
+    print(symmetricalInertia_1)
+
+    data = {
+        'พื้นผิวของอาคาร': ['1', '1E', '2', '2E', '3', '3E', '4', '4E', '5', '5E', '6', '6E'],
+        'แรงดันภายในเป็นลบ (กิโลกรัมเมตร^2)': symmetricalInertia_1,
+        'แรงดันภายในเป็นบวก (กิโลกรัมเมตร^2)': symmetricalInertia_2,
+    }
+
+    df = pd.DataFrame(data)
+
+    st.dataframe(df, hide_index=True, use_container_width=True, height=450)
+
+    st.divider()
