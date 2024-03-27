@@ -30,10 +30,9 @@ def main():
     I = important_dict[important]
     st.write(r'Important factor, $I = %.2f$' % (I))
 
-    st.write('### วิธีการวิเคราะห์โครงสร้างเพื่อคำนวณผลของแรงแผ่นดินไหว')
+    st.write('### วิธีการวิเคราะห์โครงสร้างเพื่อคำนวณผลของแรงแผ่นดินไหว โดยวิธีสถิตย์เทียบเท่า')
     cal_list = ['วิธีสถิตย์เทียบเท่า', 'วิธีเชิงพลศาสตร์']
-    cal = st.radio(label='วิธีการวิเคราะห์', options=cal_list,
-                   index=0, key='cal', horizontal=True)
+    cal = "วิธีสถิตย์เทียบเท่า"
 
     st.write('### รายละเอียดโครงสร้าง')
     col1, col2, col3 = st.columns(3)
@@ -142,10 +141,8 @@ def main():
 
         zone = st.selectbox(label='Zone', options=np.arange(1, 11), key='zone')
 
-        if cal == cal_list[0]:
-            sheet_name_ = 'bkk_equivalent'
-        else:
-            sheet_name_ = 'bkk_rsa'
+
+        sheet_name_ = 'bkk_equivalent'
 
         if damping == '5.0%':
             sheet_name = sheet_name_ + '_5.0'
@@ -308,47 +305,6 @@ def main():
                 # calculate Sa of structure
                 if T_structure <= T0:
                     Sa_structure = SDS
-                elif T_structure > T0 and T_structure <= Ts:
-                    f = interpolate.interp1d([T0, Ts], [SDS, SD1])
-                    Sa_structure = f(T_structure)
-                else:
-                    Sa_structure = SD1/T_structure
-
-        elif cal == cal_list[1]:
-            if SD1 <= SDS:
-                T0 = 0.2*SD1/SDS
-                Ts = SD1/SDS
-                T_data = np.append(
-                    [0, T0, Ts], np.arange(round(Ts, 1), 2.1, 0.1))
-                S_data = np.array([0.4*SDS, SDS, SDS])
-
-                for T in T_data:
-                    if T > Ts:
-                        S_data = np.append(S_data, [SD1/T])
-
-                # calculate Sa of structure
-                if T_structure <= T0:
-                    f = interpolate.interp1d([0.0, T0], [0.4*SDS, SDS])
-                    Sa_structure = f(T_structure)
-                elif T_structure > T0 and T_structure <= Ts:
-                    Sa_structure = SDS
-                else:
-                    Sa_structure = SD1/T_structure
-
-            elif SD1 > SDS:
-                T0 = 0.2
-                Ts = 1.0
-                T_data = np.append([0, T0, Ts], np.arange(1.1, 2.1, 0.1))
-                S_data = np.array([0.4*SDS, SDS, SD1])
-
-                for T in T_data:
-                    if T > Ts:
-                        S_data = np.append(S_data, [SD1/T])
-
-                # calculate Sa of structure
-                if T_structure <= T0:
-                    f = interpolate.interp1d([0.0, T0], [0.4*SDS, SDS])
-                    Sa_structure = f(T_structure)
                 elif T_structure > T0 and T_structure <= Ts:
                     f = interpolate.interp1d([T0, Ts], [SDS, SD1])
                     Sa_structure = f(T_structure)
@@ -538,19 +494,6 @@ def main():
             'Sa (g)': S_data
         })
 
-        # def convert_df(df):
-        #     # IMPORTANT: Cache the conversion to prevent computation on every rerun
-        #     return df.to_csv().encode('utf-8')
-
-        # csv = convert_df(df)
-
-        # st.download_button(
-        #     label="Download data as CSV",
-        #     data=csv,
-        #     file_name='response_spectrum_data.csv',
-        #     mime='text/csv',
-        # )
-
         st.dataframe(df, hide_index=True, use_container_width=True)
 
     st.write('### แรงเฉือนที่ฐานอาคาร, $V$')
@@ -561,14 +504,6 @@ def main():
     st.write('**สัมประสิทธิ์ผลตอบสนองแรงแผ่นดินไหว**')
     Cs_ = Sa_structure*I/R
     Cs = max(Cs_, 0.01)
-    # st.markdown(r'''$
-    #                 \begin{aligned}
-    #                 C_s &= S_a \left( \frac{I}{R} \right) \qquad &\ge \qquad 0.01 \\
-    #                 &= %.2f \left( \frac{%.2f}{%.2f} \right) \qquad &\ge \qquad 0.01 \\
-    #                 &= %.2f \qquad &\ge \qquad 0.01 \\
-    #                 &= %.2f \\
-    #             \end{aligned}
-    #             $'''%(Sa_structure,I,R,Cs_,Cs))
 
     st.markdown(
         r'$C_s = S_a \left( \frac{I}{R} \right) \qquad\qquad \ge \qquad 0.01$')
